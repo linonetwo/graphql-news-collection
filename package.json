@@ -1,7 +1,22 @@
 {
   "name": "graphql-news-collection",
   "version": "0.0.1",
-  "private": true,
+  "private": false,
+  "scripts": {
+    "lint": "eslint src test tools migrations",
+    "check": "flow check",
+    "test": "NODE_ENV=test mocha --compilers js:babel-register",
+    "test:watch": "NODE_ENV=test mocha --compilers js:babel-register --reporter min --watch",
+    "build": "node tools/build.js",
+    "build:watch": "node tools/build.js --watch",
+    "db:version": "node tools/db.js version",
+    "db:migrate": "node tools/db.js migrate",
+    "db:migrate:undo": "node tools/db.js migrate:undo",
+    "db:migration": "node tools/db.js migration",
+    "db:seed": "node tools/db.js seed",
+    "deploy": "node tools/publish.js",
+    "start": "node tools/run.js"
+  },
   "engines": {
     "node": ">=8.1.0",
     "npm": ">=5.0.3"
@@ -60,20 +75,5 @@
     "flow-bin": "^0.48.0",
     "mocha": "^3.4.2",
     "rimraf": "^2.6.1"
-  },
-  "scripts": {
-    "lint": "eslint src test tools migrations",
-    "check": "flow check",
-    "test": "NODE_ENV=test mocha --compilers js:babel-register",
-    "test:watch": "NODE_ENV=test mocha --compilers js:babel-register --reporter min --watch",
-    "build": "node tools/build.js",
-    "build:watch": "node tools/build.js --watch",
-    "db:version": "node tools/db.js version",
-    "db:migrate": "node tools/db.js migrate",
-    "db:migrate:undo": "node tools/db.js migrate:undo",
-    "db:migration": "node tools/db.js migration",
-    "db:seed": "node tools/db.js seed",
-    "deploy": "node tools/publish.js",
-    "start": "node tools/run.js"
   }
 }
