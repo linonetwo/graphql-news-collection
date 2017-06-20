@@ -1,12 +1,3 @@
-/**
- * Node.js API Starter Kit (https://reactstarter.com/nodejs)
- *
- * Copyright © 2016-present Kriasoft, LLC. All rights reserved.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE.txt file in the root directory of this source tree.
- */
-
 /* @flow */
 /* eslint-disable no-param-reassign, no-underscore-dangle, max-len */
 
@@ -36,21 +27,24 @@ async function login(req, provider, profile, tokens) {
   let user;
 
   if (req.user) {
+    // 首先看 users 表里是不是已经存了这个用户
     user = await db.table('users').where({ id: req.user.id }).first();
   }
 
   if (!user) {
+    // 如果没有，就看看第三方登录表里有没有
     user = await db.table('logins')
       .innerJoin('users', 'users.id', 'logins.user_id')
       .where({ 'logins.provider': provider, 'logins.id': profile.id })
       .first('users.*');
+    // 如果还是没有，就说明是用 email 注册的，看看 users 表里有没有这个 email
     if (!user && profile.emails && profile.emails.length && profile.emails[0].verified === true) {
       user = await db.table('users')
         .where('emails', '@>', JSON.stringify([{ email: profile.emails[0].value, verified: true }]))
         .first();
     }
   }
-
+  // 还是没有，就帮他注册一个
   if (!user) {
     user = (await db.table('users')
       .insert({
