@@ -1,4 +1,4 @@
-/* @flow */
+/* @flow @ts-check */
 /* eslint-disable no-param-reassign, no-underscore-dangle, max-len */
 
 import passport from 'passport';

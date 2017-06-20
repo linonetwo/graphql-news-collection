@@ -1,12 +1,3 @@
-/**
- * Node.js API Starter Kit (https://reactstarter.com/nodejs)
- *
- * Copyright © 2016-present Kriasoft, LLC. All rights reserved.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE.txt file in the root directory of this source tree.
- */
-
 /* @flow @ts-check */
 
 import validator from 'validator';
@@ -21,13 +12,13 @@ import {
 } from 'graphql-relay';
 
 import db from '../db';
-import StoryType from './StoryType';
+import SeedType from './SeedType';
 import ValidationError from './ValidationError';
 
 export const stories = {
   type: connectionDefinitions({
     name: 'Story',
-    nodeType: StoryType,
+    nodeType: SeedType,
     connectionFields: {
       totalCount: { type: new GraphQLNonNull(GraphQLInt) },
     },
@@ -70,7 +61,7 @@ const inputFields = {
 
 const outputFields = {
   story: {
-    type: StoryType,
+    type: SeedType,
   },
 };
 

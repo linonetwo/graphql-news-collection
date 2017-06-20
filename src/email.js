@@ -7,7 +7,7 @@
  * LICENSE.txt file in the root directory of this source tree.
  */
 
-/* @flow */
+/* @flow @ts-check */
 
 import fs from 'fs';
 import path from 'path';

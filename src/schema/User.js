@@ -7,7 +7,7 @@
  * LICENSE.txt file in the root directory of this source tree.
  */
 
-/* @flow */
+/* @flow @ts-check */
 /* eslint-disable import/prefer-default-export */
 
 import UserType from './UserType';

@@ -1,4 +1,4 @@
-/* @flow */
+/* @flow @ts-check */
 
 import { GraphQLError } from 'graphql';
 

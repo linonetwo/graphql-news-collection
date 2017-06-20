@@ -1,5 +1,5 @@
 
-/* @flow */
+/* @flow @ts-check */
 
 /*
  * Data loaders to be used with GraphQL resolve() functions. For example:

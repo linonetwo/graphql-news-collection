@@ -1,4 +1,4 @@
-/* @flow */
+/* @flow @ts-check */
 
 import { GraphQLObjectType, GraphQLList, GraphQLString } from 'graphql';
 import { globalIdField } from 'graphql-relay';
