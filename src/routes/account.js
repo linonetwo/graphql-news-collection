@@ -1,21 +1,39 @@
-/**
- * Node.js API Starter Kit (https://reactstarter.com/nodejs)
- *
- * Copyright © 2016-present Kriasoft, LLC. All rights reserved.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE.txt file in the root directory of this source tree.
- */
-
 /* @flow @ts-check */
 
 import URL from 'url';
 import passport from 'passport';
 import validator from 'validator';
 import { Router } from 'express';
+import jwt from 'jsonwebtoken';
+import db from '../db';
 
 const router = new Router();
 
+
+// jwt login
+router.post('/login/jwt', async (req, res) => {
+  if (req.body.username && req.body.password) {
+    const username = req.body.username;
+    const password = req.body.password;
+    const user = await db.table('users').where({ username, password }).first();
+    if (user) {
+      const payload = {
+        id: user.id,
+      };
+      const token = jwt.sign(payload, process.env.JWT_SECRET);
+      res.json({
+        token,
+      });
+    } else {
+      res.sendStatus(401);
+    }
+  } else {
+    res.sendStatus(401);
+  }
+});
+
+
+// 3rd login
 // External login providers. Also see src/passport.js.
 const loginProviders = [
   {

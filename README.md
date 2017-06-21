@@ -35,3 +35,11 @@ This project was started by [nodejs-api-starter](https://github.com/kriasoft/nod
 ├── Dockerfile                  # Commands for building a Docker image for production
 └── package.json                # The list of project dependencies
 ```
+
+## dev
+
+Enter the container:
+
+```shell
+docker-compose exec api /bin/sh
+```

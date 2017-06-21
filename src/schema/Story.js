@@ -1,12 +1,3 @@
-/**
- * Node.js API Starter Kit (https://reactstarter.com/nodejs)
- *
- * Copyright © 2016-present Kriasoft, LLC. All rights reserved.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE.txt file in the root directory of this source tree.
- */
-
 /* @flow @ts-check */
 
 import validator from 'validator';
@@ -33,7 +24,7 @@ export const stories = {
     },
   }).connectionType,
   args: forwardConnectionArgs,
-  async resolve(root, args) {
+  async resolve(parent, args) {
     const limit = typeof args.first === 'undefined' ? '10' : args.first;
     const offset = args.after ? cursorToOffset(args.after) + 1 : 0;
 
@@ -77,7 +68,7 @@ const outputFields = {
 function validate(input, { t, user }) {
   const errors = [];
   const data = {};
-
+  console.log('validate', user);
   if (!user) {
     throw new ValidationError([{ key: '', message: t('Only authenticated users can create stories.') }]);
   }
@@ -106,12 +97,6 @@ function validate(input, { t, user }) {
     } else {
       data.text = input.text;
     }
-  }
-
-  if (data.url && data.text) {
-    errors.push({ key: '', message: t('Please fill either the URL or the text field but not both.') });
-  } else if (!input.url && !input.text) {
-    errors.push({ key: '', message: t('Please fill either the URL or the text field.') });
   }
 
   data.author_id = user.id;

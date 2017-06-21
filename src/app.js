@@ -70,7 +70,7 @@ app.get('/graphql/schema', (req, res) => {
   res.type('text/plain').send(printSchema(schema));
 });
 
-app.use('/graphql', expressGraphQL(req => ({
+app.use('/graphql', passport.authenticate('jwt', { session: false }), expressGraphQL(req => ({
   schema,
   context: {
     t: req.t,

@@ -5,6 +5,7 @@ import passport from 'passport';
 import { OAuth2Strategy as GoogleStrategy } from 'passport-google-oauth';
 import { Strategy as FacebookStrategy } from 'passport-facebook';
 import { Strategy as TwitterStrategy } from 'passport-twitter';
+import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt';
 
 import db from './db';
 
@@ -20,6 +21,26 @@ passport.serializeUser((user, done) => {
 passport.deserializeUser((user, done) => {
   done(null, user);
 });
+
+// JWT check
+const jwtOption = {
+  jwtFromRequest: ExtractJwt.fromBodyField('JWT'),
+  secretOrKey: process.env.JWT_SECRET,
+};
+passport.use(new JwtStrategy(jwtOption, ({ id }, done) => {
+  db.table('users').where({ id }).first()
+    .then((user) => {
+      if (user) {
+        return done(null, user);
+      }
+      return done(null, false);
+    })
+    // error or you could create a new account
+    .catch(err => done(err, false));
+}));
+
+
+// 3rd party login
 
 // Creates or updates the external login credentials
 // and returns the currently authenticated user.

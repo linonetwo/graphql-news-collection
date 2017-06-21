@@ -33,6 +33,7 @@ services:
       - DATABASE_DEBUG=false
       - REDIS_URL=redis://redis:6379/0
       - SESSION_SECRET=wZjwhFtzQsd7r87W6AZw45Sm
+      - JWT_SECRET=cnq9875w435nwehqc311os
       - FACEBOOK_ID=1821424564802638
       - FACEBOOK_SECRET=2339bdf25f236a42fc3a18280bf455e8
       - GOOGLE_ID=xxxxx.apps.googleusercontent.com
@@ -54,6 +55,8 @@ services:
   db:
     image: postgres:9.6.3-alpine
     read_only: true
+    ports:
+      - "5432:5432"
     tmpfs:
       - /tmp
       - /var/run/postgresql
@@ -67,6 +70,8 @@ services:
     read_only: true
     volumes:
       - redis:/data
+    ports:
+      - "6379:6379"
     user: redis
 
 volumes:
