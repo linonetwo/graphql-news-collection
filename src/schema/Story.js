@@ -68,7 +68,6 @@ const outputFields = {
 function validate(input, { t, user }) {
   const errors = [];
   const data = {};
-  console.log('validate', user);
   if (!user) {
     throw new ValidationError([{ key: '', message: t('Only authenticated users can create stories.') }]);
   }
