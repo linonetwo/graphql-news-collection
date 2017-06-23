@@ -137,10 +137,9 @@ async function updateField(input, context, field: string) {
     throw new Error(t('The seed ID is invalid.'));
   }
 
-  try {
-    await db.table('seeds').where('id', '=', id).first('*');
-  } catch (error) {
-    throw new ValidationError({ key: '', message: 'Failed to done this seed. Please make sure that seed id exists.' });
+  const row = await db.table('seeds').where('id', '=', id).first('*');
+  if (!row) {
+    throw new ValidationError([{ key: '', message: 'Failed to done this seed. Please make sure that seed id exists.' }]);
   }
 
   await db.table('seeds').where('id', '=', id).update({ updated_at: db.raw('CURRENT_TIMESTAMP'), [field]: true });
