@@ -31,6 +31,8 @@ export default new GraphQLObjectType({
       type: GraphQLBoolean,
     },
 
+    parentId: globalIdField('Seed', parent => parent.parent_id || parent.id),
+
     createdAt: {
       type: new GraphQLNonNull(GraphQLString),
       resolve(parent) {

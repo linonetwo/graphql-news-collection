@@ -54,6 +54,9 @@ export default new GraphQLObjectType({
       },
     },
 
+    parentId: globalIdField('Seed', parent => parent.parent_id || parent.id),
+
+
     createdAt: {
       type: new GraphQLNonNull(GraphQLString),
       resolve(parent) {
