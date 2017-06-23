@@ -24,7 +24,7 @@ passport.deserializeUser((user, done) => {
 
 // JWT check
 const jwtOption = {
-  jwtFromRequest: ExtractJwt.fromBodyField('JWT'),
+  jwtFromRequest: ExtractJwt.fromAuthHeaderWithScheme('Bearer'),
   secretOrKey: process.env.JWT_SECRET,
 };
 passport.use(new JwtStrategy(jwtOption, ({ id }, done) => {
