@@ -1,7 +1,7 @@
 /* @flow @ts-check */
 /* eslint-disable no-console, no-shadow */
 
-import app from './app';
+import app from './expressRoutes';
 import db from './db';
 import redis from './redis';
 
