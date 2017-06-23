@@ -1,9 +1,9 @@
 /* @flow @ts-check */
 /* eslint-disable no-console, no-shadow */
 
-import app from './expressRoutes';
-import db from './db';
-import redis from './redis';
+import app from './server/expressRoutes';
+import db from './server/db';
+import redis from './server/redis';
 
 const port = process.env.PORT || 8080;
 const host = process.env.HOSTNAME || '0.0.0.0';

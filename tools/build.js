@@ -17,9 +17,9 @@ const delay100ms = (timeout => (callback) => {
 
 // Pre-compile email templates to avoid unnecessary parsing at run time. See `src/emails`.
 const compileEmail = (filename) => {
-  fs.readdirSync('src/emails').forEach((file) => {
+  fs.readdirSync('src/server/emails').forEach((file) => {
     if (file.endsWith('.hbs')) {
-      const partial = fs.readFileSync(`src/emails/${file}`, 'utf8')
+      const partial = fs.readFileSync(`src/server/emails/${file}`, 'utf8')
         .replace(/{{/g, '\\{{')
         .replace(/\\{{(#block|\/block)/g, '{{$1');
       handlebars.registerPartial(file.substr(0, file.length - 4), partial);
@@ -74,8 +74,8 @@ module.exports = task('build', ({ watch = false, onComplete } = {}) => new Promi
             fs.writeFileSync(dest, data, 'utf8');
             console.log(src, '->', dest);
             if (map) fs.writeFileSync(`${dest}.map`, JSON.stringify(map), 'utf8');
-          } else if (/^src\/emails\/.+/.test(src)) {
-            if (/^src\/emails\/.+\/.+\.hbs$/.test(src)) {
+          } else if (/^src\/server\/emails\/.+/.test(src)) {
+            if (/^src\/server\/emails\/.+\/.+\.hbs$/.test(src)) {
               const template = compileEmail(src);
               const destJs = dest.replace(/\.hbs$/, '.js');
               fs.writeFileSync(destJs, `module.exports = ${template};`, 'utf8');
