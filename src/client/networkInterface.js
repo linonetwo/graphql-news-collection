@@ -15,7 +15,7 @@ networkInterface.use([
       if (!req.options.headers) {
         req.options.headers = {}; // Create the header object if needed.
       }
-      // get the authentication token from local storage if it exists
+      // get the authentication token from API if it exists
       fetch(`${serverUrl}/login/jwt`, {
         method: 'POST',
         headers: {
