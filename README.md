@@ -38,6 +38,12 @@ This project was started by [nodejs-api-starter](https://github.com/kriasoft/nod
 
 ## dev
 
+Start Container:
+
+```shell
+docker-compose up --abort-on-container-exit
+```
+
 Enter the container:
 
 ```shell
