@@ -9,6 +9,7 @@ const { nodeInterface, nodeField: node, nodesField: nodes } = nodeDefinitions(
 
     if (type === 'User') return context.users.load(id);
     if (type === 'Story') return context.stories.load(id);
+    if (type === 'Seed') return context.seeds.load(id);
     if (type === 'Comment') return context.comments.load(id);
 
     return null;
@@ -16,6 +17,7 @@ const { nodeInterface, nodeField: node, nodesField: nodes } = nodeDefinitions(
   (obj) => {
     if (obj.__type === 'User') return require('./UserType').default;
     if (obj.__type === 'Story') return require('./StoryType').default;
+    if (obj.__type === 'Seed') return require('./SeedType').default;
     if (obj.__type === 'Comment') return require('./CommentType').default;
 
     return null;

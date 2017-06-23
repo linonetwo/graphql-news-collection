@@ -1,6 +1,7 @@
 /* @flow @ts-check */
 
 import validator from 'validator';
+import { has } from 'lodash';
 import { GraphQLNonNull, GraphQLID, GraphQLString, GraphQLInt } from 'graphql';
 import {
   fromGlobalId,
@@ -15,9 +16,9 @@ import db from '../db';
 import SeedType from './SeedType';
 import ValidationError from './ValidationError';
 
-export const stories = {
+export const seeds = {
   type: connectionDefinitions({
-    name: 'Story',
+    name: 'Seed',
     nodeType: SeedType,
     connectionFields: {
       totalCount: { type: new GraphQLNonNull(GraphQLInt) },
@@ -29,11 +30,11 @@ export const stories = {
     const offset = args.after ? cursorToOffset(args.after) + 1 : 0;
 
     const [data, totalCount] = await Promise.all([
-      db.table('stories')
+      db.table('seeds')
         .orderBy('created_at', 'desc')
         .limit(limit).offset(offset)
-        .then(rows => rows.map(x => Object.assign(x, { __type: 'Story' }))),
-      db.table('stories')
+        .then(rows => rows.map(x => Object.assign(x, { __type: 'Seed' }))),
+      db.table('seeds')
         .count().then(x => x[0].count),
     ]);
 
@@ -51,7 +52,7 @@ const inputFields = {
   title: {
     type: GraphQLString,
   },
-  text: {
+  type: {
     type: GraphQLString,
   },
   url: {
@@ -60,7 +61,7 @@ const inputFields = {
 };
 
 const outputFields = {
-  story: {
+  seed: {
     type: SeedType,
   },
 };
@@ -70,7 +71,7 @@ function validate(input, { t, user }) {
   const data = {};
 
   if (!user) {
-    throw new ValidationError([{ key: '', message: t('Only authenticated users can create stories.') }]);
+    throw new ValidationError([{ key: '', message: t('Only authenticated users can create seeds.') }]);
   }
 
   if (typeof input.title === 'undefined' || input.title.trim() === '') {
@@ -91,26 +92,20 @@ function validate(input, { t, user }) {
     }
   }
 
-  if (typeof input.text !== 'undefined' && input.text.trim() !== '') {
-    if (!validator.isLength(input.text, { min: 20, max: 2000 })) {
-      errors.push({ key: 'text', message: t('The text field must be between 20 and 2000 characters long.') });
+  // List 类型是可以直接爬里面的列表，每个列表就是一篇文章，Explore 是需要搜索的，BFS 那样
+  if (typeof input.type !== 'undefined' && input.type.trim() !== '') {
+    if (!has({ List: true, Explore: true }, input.type)) {
+      errors.push({ key: 'type', message: t('The type field must be "List" or "Explore" .') });
     } else {
-      data.text = input.text;
+      data.type = input.type;
     }
   }
 
-  if (data.url && data.text) {
-    errors.push({ key: '', message: t('Please fill either the URL or the text field but not both.') });
-  } else if (!input.url && !input.text) {
-    errors.push({ key: '', message: t('Please fill either the URL or the text field.') });
-  }
-
-  data.author_id = user.id;
   return { data, errors };
 }
 
-export const createStory = mutationWithClientMutationId({
-  name: 'CreateStory',
+export const createSeed = mutationWithClientMutationId({
+  name: 'CreateSeed',
   inputFields,
   outputFields,
   async mutateAndGetPayload(input, context) {
@@ -120,43 +115,51 @@ export const createStory = mutationWithClientMutationId({
       throw new ValidationError(errors);
     }
 
-    const rows = await db.table('stories').insert(data).returning('id');
-    return context.stories.load(rows[0]).then(story => ({ story }));
+    const rows = await db.table('seeds').insert(data).returning('id');
+    return context.seeds.load(rows[0]).then(seed => ({ seed }));
   },
 });
 
-export const updateStory = mutationWithClientMutationId({
-  name: 'UpdateStory',
+async function updateField(input, context, field: string) {
+  const { t, user } = context;
+  const { type, id } = fromGlobalId(input.id);
+
+  if (!user) {
+    throw new ValidationError([{ key: '', message: t('Only authenticated users can done seeds.') }]);
+  }
+  if (type !== 'Seed') {
+    throw new Error(t('The seed ID is invalid.'));
+  }
+
+  try {
+    await db.table('seeds').where('id', '=', id).first('*');
+  } catch (error) {
+    throw new ValidationError({ key: '', message: 'Failed to done this seed. Please make sure that seed id exists.' });
+  }
+
+  await db.table('seeds').where('id', '=', id).update({ updated_at: db.raw('CURRENT_TIMESTAMP'), [field]: true });
+  await context.seeds.clear(id);
+  return context.seeds.load(id).then(x => ({ seed: x }));
+}
+
+export const useSeed = mutationWithClientMutationId({
+  name: 'useSeed',
   inputFields: {
     id: { type: new GraphQLNonNull(GraphQLID) },
-    ...inputFields,
   },
   outputFields,
   async mutateAndGetPayload(input, context) {
-    const { t, user } = context;
-    const { type, id } = fromGlobalId(input.id);
+    return updateField(input, context, 'using');
+  },
+});
 
-    if (type !== 'Story') {
-      throw new Error(t('The story ID is invalid.'));
-    }
-
-    const { data, errors } = validate(input, context);
-    const story = await db.table('stories').where('id', '=', id).first('*');
-
-    if (!story) {
-      errors.push({ key: '', message: 'Failed to save the story. Please make sure that it exists.' });
-    } else if (story.author_id !== user.id) {
-      errors.push({ key: '', message: 'You can only edit your own stories.' });
-    }
-
-    if (errors.length) {
-      throw new ValidationError(errors);
-    }
-
-    data.updated_at = db.raw('CURRENT_TIMESTAMP');
-
-    await db.table('stories').where('id', '=', id).update(data);
-    await context.stories.clear(id);
-    return context.stories.load(id).then(x => ({ story: x }));
+export const doneSeed = mutationWithClientMutationId({
+  name: 'doneSeed',
+  inputFields: {
+    id: { type: new GraphQLNonNull(GraphQLID) },
+  },
+  outputFields,
+  mutateAndGetPayload(input, context) {
+    return updateField(input, context, 'done');
   },
 });

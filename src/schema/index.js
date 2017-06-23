@@ -5,6 +5,7 @@ import { GraphQLSchema, GraphQLObjectType } from 'graphql';
 import { me, createUser } from './User';
 import { node, nodes } from './Node';
 import { stories, createStory, updateStory } from './Story';
+import { seeds, createSeed, useSeed, doneSeed } from './Seed';
 import { createComment, updateComment } from './Comment';
 
 export default new GraphQLSchema({
@@ -15,6 +16,7 @@ export default new GraphQLSchema({
       node,
       nodes,
       stories,
+      seeds,
     },
   }),
   mutation: new GraphQLObjectType({
@@ -23,6 +25,9 @@ export default new GraphQLSchema({
       createUser,
       createStory,
       updateStory,
+      createSeed,
+      useSeed,
+      doneSeed,
       createComment,
       updateComment,
     },

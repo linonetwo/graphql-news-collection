@@ -1,9 +1,8 @@
 /* @flow @ts-check */
 
-import { GraphQLObjectType, GraphQLList, GraphQLNonNull, GraphQLInt, GraphQLString } from 'graphql';
+import { GraphQLObjectType, GraphQLNonNull, GraphQLString, GraphQLBoolean } from 'graphql';
 import { globalIdField } from 'graphql-relay';
 import { nodeInterface } from './Node';
-import stories from './Story';
 
 export default new GraphQLObjectType({
   name: 'Seed',
@@ -24,8 +23,12 @@ export default new GraphQLObjectType({
       type: GraphQLString,
     },
 
-    stories: {
-      type: stories,
+    using: {
+      type: GraphQLBoolean,
+    },
+
+    done: {
+      type: GraphQLBoolean,
     },
 
     createdAt: {

@@ -55,6 +55,11 @@ export default {
       .select('*')
       .then(mapTo(keys, x => x.id, 'Story'))),
 
+    seeds: new DataLoader(keys => db.table('seeds')
+      .whereIn('id', keys)
+      .select('*')
+      .then(mapTo(keys, x => x.id, 'Seed'))),
+
     storyCommentsCount: new DataLoader(keys => db.table('stories')
       .leftJoin('comments', 'stories.id', 'comments.story_id')
       .whereIn('stories.id', keys)
