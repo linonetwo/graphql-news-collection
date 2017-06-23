@@ -49,6 +49,9 @@ export const seeds = {
 };
 
 const inputFields = {
+  parentId: {
+    type: GraphQLID,
+  },
   title: {
     type: GraphQLString,
   },
@@ -100,6 +103,9 @@ function validate(input, { t, user }) {
       data.type = input.type;
     }
   }
+
+  // BFS 时，这个东西的来源，一般是由另一个种子爬到的，当然，没有就拉倒
+  data.parent_id = input.parentId;
 
   return { data, errors };
 }

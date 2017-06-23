@@ -98,13 +98,19 @@ function validate(input, { t, user }) {
     }
   }
 
+  // BFS 时，这个东西的来源，一般是由另一个种子爬到的，当然，没有就拉倒
+  data.parent_id = input.parentId;
+
   data.author_id = user.id;
   return { data, errors };
 }
 
 export const createStory = mutationWithClientMutationId({
   name: 'CreateStory',
-  inputFields,
+  inputFields: {
+    parentId: { type: GraphQLID },
+    ...inputFields,
+  },
   outputFields,
   async mutateAndGetPayload(input, context) {
     const { data, errors } = validate(input, context);
