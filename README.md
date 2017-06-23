@@ -43,3 +43,10 @@ Enter the container:
 ```shell
 docker-compose exec api /bin/sh
 ```
+
+Change database schema (migration):
+
+```shell
+# after enter the container
+npm run db:migrate
+```
