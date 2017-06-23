@@ -1,10 +1,12 @@
 /* @flowtype @ts-check */
+import fetch from 'node-fetch';
 import ApolloClient, { createNetworkInterface } from 'apollo-client';
 import gql from 'graphql-tag';
 
+const serverUrl = 'http://localhost:8080';
 
 const networkInterface = createNetworkInterface({
-  uri: 'http://localhost:8080/graphql',
+  uri: `${serverUrl}/graphql`,
 });
 
 networkInterface.use([
@@ -14,7 +16,25 @@ networkInterface.use([
         req.options.headers = {}; // Create the header object if needed.
       }
       // get the authentication token from local storage if it exists
-      req.options.headers.Authorization = 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImNmODhmY2E0LTU2NGUtMTFlNy05NjNlLWYzOTI2NjA5ZGI5OCIsImlhdCI6MTQ5ODAzNDQ5N30.rr4rsldehflOjQvZPIM-G4MKGJU2RyoGyzSGJE36xgs';
+      fetch(`${serverUrl}/login/jwt`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify({
+          username: '',
+          password: '',
+        }),
+      })
+      .then(response => response.json())
+      .then(({ token }) => {
+        req.options.headers.Authorization = `Bearer ${token}`;
+      })
+      .catch((ex) => {
+        console.log('parsing failed', ex);
+      });
+
       next();
     },
   },
