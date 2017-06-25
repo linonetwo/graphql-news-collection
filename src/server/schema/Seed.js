@@ -150,10 +150,23 @@ async function updateField(input, context, field: string) {
 export const useSeed = mutationWithClientMutationId({
   name: 'useSeed',
   inputFields: {
-    id: { type: new GraphQLNonNull(GraphQLID) },
+    id: { type: GraphQLID },
   },
   outputFields,
   async mutateAndGetPayload(input, context) {
+    // 如果没有提供 ID，就找一个最早的 seed 给它用
+    if (!input.id) {
+      const row = await db.table('seeds')
+        .where('done', '=', false).andWhere('using', '=', false)
+        .orderBy('created_at', 'asc')
+        .first('*');
+      if (!row) {
+        throw new ValidationError([{ key: '', message: 'Failed to get seed. Seed list may be empty.' }]);
+      }
+      await db.table('seeds').where('id', '=', row.id).update({ updated_at: db.raw('CURRENT_TIMESTAMP'), using: true });
+      await context.seeds.clear(row.id);
+      return context.seeds.load(row.id).then(x => ({ seed: x }));
+    }
     return updateField(input, context, 'using');
   },
 });
