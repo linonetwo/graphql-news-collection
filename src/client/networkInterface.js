@@ -1,69 +1,71 @@
 /* @flowtype @ts-check */
 import fetch from 'node-fetch';
 import ApolloClient, { createNetworkInterface } from 'apollo-client';
-import gql from 'graphql-tag';
 
-const serverUrl = 'http://localhost:8080';
+const serverUrl = 'http://localhost:80';
+const authOptions = {
+  body: {
+    username: '',
+    password: '',
+  },
+  headers: {
+    'Content-Type': 'application/json',
+    Accept: 'application/json',
+  },
+};
 
-const networkInterface = createNetworkInterface({
-  uri: `${serverUrl}/graphql`,
-});
+function getJWT(): Promise<string> {
+  // get the authentication token from API if it exists
+  return fetch(`${serverUrl}/login/jwt`, {
+    method: 'POST',
+    headers: authOptions.headers,
+    body: JSON.stringify(authOptions.body),
+  })
+  .then(response => response.json())
+  .then(({ token }) => `Bearer ${token}`)
+  .catch(error => Promise.reject(`No token returned, maybe username( ${authOptions.body.username} ) or password( ${authOptions.body.password} ) wrong or server error: ${error}`));
+}
 
-networkInterface.use([
-  {
-    applyMiddleware(req, next) {
-      if (!req.options.headers) {
-        req.options.headers = {}; // Create the header object if needed.
-      }
-      // get the authentication token from API if it exists
-      fetch(`${serverUrl}/login/jwt`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-        },
-        body: JSON.stringify({
-          username: '',
-          password: '',
-        }),
-      })
-      .then(response => response.json())
-      .then(({ token }) => {
-        req.options.headers.Authorization = `Bearer ${token}`;
-      })
-      .catch((ex) => {
-        console.log('parsing failed', ex);
+const logGraphQLErrors = {
+  applyAfterware({ response }, next) {
+    if (!response.ok) {
+      response.clone().text().then((bodyText) => {
+        console.error(`Network Error: ${response.status} (${response.statusText}) - ${bodyText}`);
+        next();
       });
-
-      next();
-    },
-  },
-]);
-
-const client = new ApolloClient({
-  networkInterface,
-});
-
-client.mutate({
-  variables: {
-    input: { title: 'testseed1', type: 'Explore', url: 'http://fakeurl.com', clientMutationId: 'qwerasdf' },
-  },
-  mutation: gql`
-    mutation createSeed($input: CreateSeedInput!) {
-      createSeed(input: $input) {
-        seed {
-            id
-            parentId
-            url
-            type
-            title
-            using
-            done
-          }
-        clientMutationId
-      }
+    } else {
+      response.clone().json().then(({ errors }) => {
+        if (errors) {
+          console.error('GraphQL Errors:', errors.map(e => `${e.message} ${JSON.stringify(e.state)} in ${JSON.stringify(e.path)}`));
+        }
+        next();
+      });
     }
-  `,
-})
-  .then(data => console.log(data))
-  .catch(error => console.error(error));
+  },
+};
+
+export default async function getGraphqlClient(): Promise<ApolloClient> {
+  const token = await getJWT();
+  const networkInterface = createNetworkInterface({
+    uri: `${serverUrl}/graphql`,
+  });
+
+  networkInterface.use([
+    {
+      applyMiddleware(req, next) {
+        if (!req.options.headers) {
+          req.options.headers = {}; // Create the header object if needed.
+        }
+        req.options.headers.Authorization = token;
+        next();
+      },
+    },
+  ]);
+
+  networkInterface.useAfter([logGraphQLErrors]);
+
+  const client = new ApolloClient({
+    networkInterface,
+  });
+  return client;
+}
