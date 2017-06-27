@@ -2,11 +2,11 @@
 import fetch from 'node-fetch';
 import ApolloClient, { createNetworkInterface } from 'apollo-client';
 
-const serverUrl = 'http://localhost:8080';
+const serverUrl = 'http://localhost:80';
 const authOptions = {
   body: {
-    username: 'linonetwo012',
-    password: 'qwer1234',
+    username: '',
+    password: '',
   },
   headers: {
     'Content-Type': 'application/json',
@@ -23,8 +23,26 @@ function getJWT(): Promise<string> {
   })
   .then(response => response.json())
   .then(({ token }) => `Bearer ${token}`)
-  .catch(error => Promise.reject(`No token returned, maybe username( ${authOptions.body.username} ) or password( ${authOptions.body.password} ) wrong. ${error}`));
+  .catch(error => Promise.reject(`No token returned, maybe username( ${authOptions.body.username} ) or password( ${authOptions.body.password} ) wrong or server error: ${error}`));
 }
+
+const logGraphQLErrors = {
+  applyAfterware({ response }, next) {
+    if (!response.ok) {
+      response.clone().text().then((bodyText) => {
+        console.error(`Network Error: ${response.status} (${response.statusText}) - ${bodyText}`);
+        next();
+      });
+    } else {
+      response.clone().json().then(({ errors }) => {
+        if (errors) {
+          console.error('GraphQL Errors:', errors.map(e => `${e.message} ${JSON.stringify(e.state)} in ${JSON.stringify(e.path)}`));
+        }
+        next();
+      });
+    }
+  },
+};
 
 export default async function getGraphqlClient(): Promise<ApolloClient> {
   const token = await getJWT();
@@ -43,6 +61,8 @@ export default async function getGraphqlClient(): Promise<ApolloClient> {
       },
     },
   ]);
+
+  networkInterface.useAfter([logGraphQLErrors]);
 
   const client = new ApolloClient({
     networkInterface,
