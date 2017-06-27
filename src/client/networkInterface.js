@@ -5,8 +5,8 @@ import ApolloClient, { createNetworkInterface } from 'apollo-client';
 const serverUrl = 'http://localhost:80';
 const authOptions = {
   body: {
-    username: '',
-    password: '',
+    username: 'crawlertest1',
+    password: 'crawlertest1',
   },
   headers: {
     'Content-Type': 'application/json',
