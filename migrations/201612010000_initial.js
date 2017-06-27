@@ -29,7 +29,7 @@ module.exports.up = async (db) => {
     table.uuid('id').notNullable().defaultTo(db.raw('uuid_generate_v1mc()')).primary();
     table.uuid('author_id').notNullable().references('id').inTable('users').onDelete('CASCADE').onUpdate('CASCADE');
     table.string('title', 80).notNullable();
-    table.string('url', 200);
+    table.string('url', 512);
     table.text('text');
     table.timestamps(false, true);
   });
