@@ -13,7 +13,7 @@ services:
     depends_on:
       - api
     ports:
-      - "8080:80"
+      - "80:80"
       - "8443:443"
     volumes:
       - ./config/nginx-snippets:/etc/nginx/snippets:ro
