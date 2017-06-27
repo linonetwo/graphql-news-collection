@@ -1,7 +1,7 @@
 /* @flow @ts-check */
 import gql from 'graphql-tag';
 import ApolloClient from 'apollo-client';
-import { seeds } from './channels';
+import { seeds } from '../channels';
 
 async function useSeed(client: ApolloClient) {
   const { data: { useSeed: { seed } } } = await client.mutate({

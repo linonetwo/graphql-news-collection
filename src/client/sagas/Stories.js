@@ -2,9 +2,9 @@
 import gql from 'graphql-tag';
 import ApolloClient from 'apollo-client';
 
-import { stories } from './channels';
+import { stories } from '../channels';
 
-import type { Story } from './types';
+import type { Story } from '../types';
 
 
 async function createStory(client: ApolloClient, story: Story) {
@@ -13,7 +13,7 @@ async function createStory(client: ApolloClient, story: Story) {
       input: story,
     },
     mutation: gql`
-      mutation createStory($input: createStoryInput!) {
+      mutation createStory($input: CreateStoryInput!) {
         createStory(input: $input) {
           story {
             id
