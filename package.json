@@ -15,7 +15,8 @@
     "db:migration": "node tools/db.js migration",
     "db:seed": "node tools/db.js seed",
     "deploy": "node tools/publish.js",
-    "start": "node tools/run.js"
+    "start": "node tools/run.js",
+    "crawl": "cross-env NODE_ENV=production node .\\build\\client.js"
   },
   "engines": {
     "node": ">=8.1.0",
@@ -79,6 +80,7 @@
     "chai": "^4.0.2",
     "chai-http": "^3.0.0",
     "chokidar": "^1.7.0",
+    "cross-env": "^5.0.1",
     "eslint": "^3.19.0",
     "eslint-config-airbnb-base": "^11.2.0",
     "eslint-plugin-flowtype": "^2.34.0",
