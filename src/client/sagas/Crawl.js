@@ -5,25 +5,6 @@ import { seeds, stories } from '../channels';
 
 import type { Story } from '../types';
 
-function validLink(ele) {
-  if (!ele.uri || !ele.title) {
-    return false;
-  }
-  /**
-   * must be:
-   * 1. uri must have 4 digital at least
-   * 2. uri can not be a bitmap
-   * 3. uri can not have no path
-   * 4. length of title must greater than 5
-   */
-  let qsi;
-  let uri = ele.uri;
-  if ((qsi = uri.indexOf('?')) > 0) {
-    uri = uri.substr(0, qsi);
-  }
-  return uri.match(/\d{4,}/i) && !uri.match(/\.(jpg|png|jpeg|pdf)/i) && uri.indexOf('/') !== uri.length - 1 && ele.title.length >= 5;
-}
-
 async function getStory(url: string): Story {
   const browser = new HeadlessChrome({
     headless: true,
@@ -38,10 +19,8 @@ async function getStory(url: string): Story {
   await browser.init();
   await browser.goTo(url);
 
-  const { result: { value: html } } = await browser.evaluate((selector) => {
-    const selectorHtml = document.querySelector(selector);
-    return selectorHtml.innerHTML;
-  }, 'html');
+  const { result: { value: html } } = await browser.evaluate(() => document.querySelector('html').innerHTML);
+  const { result: { value: allLinksInPage } } = await browser.evaluate(() => [...document.querySelectorAll('a')].map(link => ({ url: link.href, title: link.innerHTML })));
 
   if (!html) return Promise.reject(`no HTML in ${url}`);
 
@@ -51,8 +30,11 @@ async function getStory(url: string): Story {
 }
 
 export default async function Crawl() {
-  const seed = await seeds.take();
-  const story = await getStory(seed.url);
-  // Put in channel and directly get next seed
-  stories.put(story);
+  while (true) {
+    const seed = await seeds.take();
+    const story = await getStory(seed.url);
+    // Put in channel and directly get next seed
+    stories.put(story);
+    if (process.env.NODE_ENV !== 'production') break;
+  }
 }

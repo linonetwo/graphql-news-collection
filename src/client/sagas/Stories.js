@@ -30,7 +30,10 @@ async function createStory(client: ApolloClient, story: Story) {
 }
 
 export default async function Stories(client: ApolloClient) {
-  const story = await stories.take();
-  await createStory(client, story);
-  console.log(`Story ${story.title} sent to server.`);
+  while (true) {
+    const story = await stories.take();
+    await createStory(client, story);
+    console.log(`Story ${story.title} sent to server.`);
+    if (process.env.NODE_ENV !== 'production') break;
+  }
 }
