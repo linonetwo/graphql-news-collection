@@ -26,6 +26,7 @@ services:
     depends_on:
       - db
       - redis
+      - chrome-headless
     environment:
       - CHOKIDAR_USEPOLLING=true
       - CORS_ORIGIN=http://localhost:3001,http://localhost:3000
@@ -74,6 +75,13 @@ services:
       - "6379:6379"
     user: redis
 
+  chrome-headless:
+    image: yukinying/chrome-headless:latest
+    read_only: true
+    ports:
+      - "9222:9222"
+    shm_size:
+      256m
 volumes:
   db:
   redis:
