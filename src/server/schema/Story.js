@@ -91,8 +91,8 @@ function validate(input, { t, user }) {
   }
 
   if (typeof input.text !== 'undefined' && input.text.trim() !== '') {
-    if (!validator.isLength(input.text, { min: 20, max: 200000 })) {
-      errors.push({ key: 'text', message: t('The text field must be between 20 and 200000 characters long.') });
+    if (!validator.isLength(input.text, { min: 2, max: 200000 })) {
+      errors.push({ key: 'text', message: t('The text field must be between 2 and 200000 characters long.') });
     } else {
       data.text = input.text;
     }
