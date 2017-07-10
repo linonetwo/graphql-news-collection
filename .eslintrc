@@ -1,6 +1,7 @@
 {
   "globals": {
-    "fetch": true
+    "fetch": true,
+    "document": true
   },
   "parser": "babel-eslint",
   "extends": "airbnb-base",
