@@ -30,13 +30,13 @@ async function useSeed(client: ApolloClient) {
 }
 
 async function createSeed(client: ApolloClient, aNewLink: NewLink) {
-  const { data: { useSeed: { seed } } } = await client.mutate({
+  const { data: { createSeed: { seed } } } = await client.mutate({
     variables: {
       input: aNewLink,
     },
     mutation: gql`
-      mutation createSeed($title: string!, $type: string!, $url: string!) {
-        createSeed(input: {title: $title, type: $type, url: $url, clientMutationId: "qwerasdf"}) {
+      mutation createSeed($input: CreateSeedInput!) {
+        createSeed(input: $input) {
           seed {
               id
               parentId
@@ -67,32 +67,36 @@ async function getSeeds(client: ApolloClient) {
 
 
 function validLink(link: NewLink) {
-  if (!link.uri || !link.title) {
+  console.log(`validating ${JSON.stringify(link)}`);
+  if (!link.url || !link.title) {
     return false;
   }
   /**
    * must be:
-   * 1. uri
-   * 2. uri can not be a bitmap
-   * 3. uri can not have no path
+   * 1. url
+   * 2. url can not be a bitmap
+   * 3. url can not have no path
    * 4. length of title must greater than 1
    */
-  let uri = link.uri;
-  const queryString = uri.indexOf('?');
+  let url = link.url;
+  const queryString = url.indexOf('?');
   if (queryString > 0) {
-    uri = uri.substr(0, queryString);
+    url = url.substr(0, queryString);
   }
-  return uri.match(/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)/i)
-      && !uri.match(/\.(jpg|png|jpeg|pdf)/i)
-      && uri.indexOf('/') !== uri.length - 1
+  return url.match(/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)/i)
+      && !url.match(/\.(jpg|png|jpeg|pdf)/i)
+      && url.indexOf('/') !== url.length - 1
       && link.title.length >= 1;
 }
 
 async function saveSeeds(client: ApolloClient) {
   while (true) {
-    const aNewLink: NewLink = await newLinks.take();
-    if (validLink(aNewLink)) {
-      await createSeed(client, aNewLink);
+    const allLinksInPage = await newLinks.take();
+    for (const aNewLink of allLinksInPage) {
+      if (validLink(aNewLink)) {
+        await createSeed(client, aNewLink);
+        console.log(`Seed ${aNewLink.url} sent to server.`);
+      }
     }
     if (process.env.NODE_ENV !== 'production') break;
   }

@@ -1,7 +1,7 @@
 /* @flow @ts-check */
 import HeadlessChrome from 'simple-headless-chrome';
 import read from 'read-art';
-import { seeds, stories } from '../channels';
+import { seeds, stories, newLinks } from '../channels';
 
 import type { Story } from '../types';
 
@@ -26,15 +26,16 @@ async function getStory(url: string): Story {
 
   // for detailed selector , try https://github.com/Tjatse/node-readability/wiki/Handbook#example-2
   const article = await read(html);
-  return { title: article.title, text: article.content, url, clientMutationId: 'qwerasdf' };
+  return { title: article.title, text: article.content, url, links: allLinksInPage, clientMutationId: 'qwerasdf' };
 }
 
 export default async function Crawl() {
   while (true) {
     const seed = await seeds.take();
-    const story = await getStory(seed.url);
+    const { links, ...story } = await getStory(seed.url);
     // Put in channel and directly get next seed
     stories.put(story);
+    newLinks.put(links);
     if (process.env.NODE_ENV !== 'production') break;
   }
 }
