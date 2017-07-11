@@ -10,11 +10,12 @@ import type { Story } from '../types';
 async function createStory(client: ApolloClient, story: Story) {
   await client.mutate({
     variables: {
-      input: story,
+      storyInput: { ...story, seedId: undefined },
+      seedId: story.seedId,
     },
     mutation: gql`
-      mutation createStory($input: CreateStoryInput!) {
-        createStory(input: $input) {
+      mutation createStory($storyInput: CreateStoryInput!, $seedId: ID!) {
+        createStory(input: $storyInput) {
           story {
             id
             author {
@@ -23,6 +24,17 @@ async function createStory(client: ApolloClient, story: Story) {
             }
             title
           }
+        }
+        doneSeed(input: {id: $seedId, clientMutationId: "qwerasdf"}) {
+          seed {
+              id
+              url
+              type
+              title
+              using
+              done
+            }
+          clientMutationId
         }
       }
     `,

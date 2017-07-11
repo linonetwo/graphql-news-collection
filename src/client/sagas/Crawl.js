@@ -34,7 +34,7 @@ export default async function Crawl() {
     const seed = await seeds.take();
     const { links, ...story } = await getStory(seed.url);
     // Put in channel and directly get next seed
-    stories.put(story);
+    stories.put({ ...story, seedId: seed.id });
     newLinks.put(links);
     if (process.env.NODE_ENV !== 'production') break;
   }
