@@ -5,6 +5,10 @@ import { seeds, stories, newLinks } from '../channels';
 
 import type { Story } from '../types';
 
+function decideType() {
+  
+}
+
 async function getStory(url: string): Story {
   const browser = new HeadlessChrome({
     headless: true,
@@ -26,7 +30,10 @@ async function getStory(url: string): Story {
 
   // for detailed selector , try https://github.com/Tjatse/node-readability/wiki/Handbook#example-2
   const article = await read(html);
-  return { title: article.title, text: article.content, url, links: allLinksInPage, clientMutationId: 'qwerasdf' };
+
+  // Decide type:
+  // if parent is List, this page will be Story, and link start from this page will be Explore
+  return { type: 'Explore', title: article.title, text: article.content, url, links: allLinksInPage, clientMutationId: 'qwerasdf' };
 }
 
 export default async function Crawl() {
