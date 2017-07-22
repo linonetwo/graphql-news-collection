@@ -16,6 +16,7 @@
     "db:seed": "node tools/db.js seed",
     "deploy": "node tools/publish.js",
     "start": "node tools/run.js",
+    "try:client": "babel-node try.js",
     "crawl": "cross-env NODE_ENV=production node .\\build\\client.js"
   },
   "engines": {
