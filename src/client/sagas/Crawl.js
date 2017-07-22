@@ -6,10 +6,18 @@ import { seeds, stories, newLinks } from '../channels';
 import type { Story } from '../types';
 
 function decideType() {
-  
+
 }
 
-async function getStory(url: string): Story {
+async function getHTMLandLinks(browser) {
+  // get HTML and Links
+  const { result: { value: html } } = await browser.evaluate(() => document.querySelector('html').innerHTML);
+  const { result: { value: allLinksInPage } } = await browser.evaluate(() => [...document.querySelectorAll('a')].map(link => ({ url: link.href, title: link.innerHTML })));
+  return { html, allLinksInPage };
+}
+
+export async function getStory(url: string): Story {
+  // Connect Headless Chrome
   const browser = new HeadlessChrome({
     headless: true,
     launchChrome: false,
@@ -23,11 +31,10 @@ async function getStory(url: string): Story {
   await browser.init();
   await browser.goTo(url);
 
-  const { result: { value: html } } = await browser.evaluate(() => document.querySelector('html').innerHTML);
-  const { result: { value: allLinksInPage } } = await browser.evaluate(() => [...document.querySelectorAll('a')].map(link => ({ url: link.href, title: link.innerHTML })));
-
+  const { html, allLinksInPage } = await getHTMLandLinks(browser);
   if (!html) return Promise.reject(`no HTML in ${url}`);
 
+  // get content from HTML, by readability
   // for detailed selector , try https://github.com/Tjatse/node-readability/wiki/Handbook#example-2
   const article = await read(html);
 
