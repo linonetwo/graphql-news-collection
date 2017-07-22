@@ -255,7 +255,7 @@ aws4@^1.2.1:
 
 babel-cli@^6.24.1:
   version "6.24.1"
-  resolved "http://registry.npm.taobao.org/babel-cli/download/babel-cli-6.24.1.tgz#207cd705bba61489b2ea41b5312341cf6aca2283"
+  resolved "https://registry.yarnpkg.com/babel-cli/-/babel-cli-6.24.1.tgz#207cd705bba61489b2ea41b5312341cf6aca2283"
   dependencies:
     babel-core "^6.24.1"
     babel-polyfill "^6.23.0"
