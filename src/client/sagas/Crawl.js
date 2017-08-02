@@ -9,8 +9,23 @@ function decideType() {
 
 }
 
-// 下载一个 URL 对应的页面，获得 HTML 以及页面中所有的链接
+async function getHTMLandLinks(browser) {
+  // get HTML and Links
+  const { result: { value: html } } = await browser.evaluate(() => document.querySelector('html').innerHTML);
+  const { result: { value: allLinksInPage } } = await browser.evaluate(() => [...document.querySelectorAll('a')].map(link => ({ url: link.href, title: link.innerHTML })));
+  return { html, allLinksInPage };
+}
+
+// 精炼得到的 HTML，得到正文部分
+export async function getContent(html: string): string {
+  // get content from HTML, by readability
+  // for detailed selector , try https://github.com/Tjatse/node-readability/wiki/Handbook#example-2
+  const article = await read(html);
+  return { title: article.title, text: article.content };
+}
+
 export async function getPage(url: string): Story {
+  // Connect Headless Chrome
   const browser = new HeadlessChrome({
     headless: true,
     launchChrome: false,
@@ -24,22 +39,14 @@ export async function getPage(url: string): Story {
   await browser.init();
   await browser.goTo(url);
 
-  const { result: { value: html } } = await browser.evaluate(() => document.querySelector('html').innerHTML);
-  const { result: { value: allLinksInPage } } = await browser.evaluate(() => [...document.querySelectorAll('a')].map(link => ({ url: link.href, title: link.innerHTML })));
-
+  const { html, allLinksInPage } = await getHTMLandLinks(browser);
   if (!html) return Promise.reject(`no HTML in ${url}`);
 
   // Decide type:
   // if parent is List, this page will be Story, and link start from this page will be Explore
-  return { type: 'Explore', url, links: allLinksInPage, clientMutationId: 'qwerasdf' };
+  return { type: 'Explore', url, html, links: allLinksInPage, clientMutationId: 'qwerasdf' };
 }
 
-// 精炼得到的 HTML，得到正文部分
-export async function getContent(html: string): string {
-  // for detailed selector , try https://github.com/Tjatse/node-readability/wiki/Handbook#example-2
-  const article = await read(html);
-  return { title: article.title, text: article.content };
-}
 
 export default async function Crawl() {
   while (true) {

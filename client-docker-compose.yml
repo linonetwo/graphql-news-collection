@@ -2,30 +2,12 @@ version: '3'
 
 services:
 
-  # Nginx web server acting as a reverse proxy for "web" and "api" services
-  nginx:
-    image: nginx:1.13.1-alpine
-    read_only: true
-    tmpfs:
-      - /var/cache/nginx
-      - /var/log/nginx
-      - /var/run
-    depends_on:
-      - api
-    ports:
-      - "80:80"
-      - "8443:443"
-    volumes:
-      - ./config/nginx-snippets:/etc/nginx/snippets:ro
-      - ./config/nginx.conf:/etc/nginx/conf.d/default.conf:ro
-
   # Data API and authentication/authorization
-  api:
+  crawl:
     image: node:8.1.0-alpine
-    hostname: api
+    hostname: crawl
     depends_on:
-      - db
-      - redis
+      - chrome-headless
     environment:
       - CHOKIDAR_USEPOLLING=true
       - CORS_ORIGIN=http://localhost:3001,http://localhost:3000
@@ -74,6 +56,13 @@ services:
       - "6379:6379"
     user: redis
 
+  chrome-headless:
+    image: yukinying/chrome-headless:latest
+    read_only: true
+    ports:
+      - "9222:9222"
+    shm_size:
+      256m
 volumes:
   db:
   redis:
