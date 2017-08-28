@@ -47,7 +47,7 @@ docker-compose up --abort-on-container-exit
 Enter the container:
 
 ```shell
-docker-compose exec api /bin/sh
+docker-compose exec db /bin/sh
 ```
 
 Change database schema (migration):
